@@ -61,13 +61,13 @@ python3 android_emulator.py start
 In another Terminal:
 
 ```bash
-python3 android_emulator.py devices
+android-emulator devices
 ```
 
 ## 6. Install an APK
 
 ```bash
-python3 android_emulator.py install-apk /absolute/path/to/app-debug.apk
+android-emulator install-apk /absolute/path/to/app-debug.apk
 ```
 
 ## SDK directory
