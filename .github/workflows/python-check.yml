@@ -1,0 +1,16 @@
+name: Python checks
+
+on: [push, pull_request]
+
+jobs:
+  syntax:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile CLI
+        run: python -m py_compile android_emulator.py
+      - name: Check CLI help
+        run: python android_emulator.py --help
