@@ -8,6 +8,8 @@
 Install and manage the official Android Emulator on macOS from the terminal without installing Android Studio.
 
 ## Included
+- One-command Pixel launch: `android-emulator launch pixel` after running `./scripts/install.sh`.
+- Global `android-emulator` launcher installed in `~/.local/bin`.
 
 - macOS architecture detection (Apple Silicon / Intel)
 - Java and disk-space preflight checks
