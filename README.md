@@ -56,7 +56,7 @@ A lightweight Python command-line tool to install, configure, launch, and manage
 5. Open a new Terminal window, then start the emulator:
 
    ```bash
-   python3 android_emulator.py start
+   android-emulator launch pixel
    ```
 
 ## Commands
@@ -65,10 +65,13 @@ A lightweight Python command-line tool to install, configure, launch, and manage
 |---|---|
 | `setup` | Install SDK packages and create the default AVD |
 | `doctor` | Inspect Java, SDK paths, installed tools, and free disk space |
-| `start` | Start the configured Android virtual device |
+| `launch pixel` | Launch the Pixel virtual device with one command |
+| `start` | Legacy alias for launching the default Pixel device |
 | `stop` | Stop the running emulator |
 | `devices` | List connected devices with ADB |
 | `install-apk <path>` | Install or replace an APK on the connected emulator |
+
+After running `scripts/install.sh`, the `android-emulator` command is installed in `~/.local/bin`. Ensure that directory is on your shell `PATH` (the installer adds it to `~/.zshrc`).
 
 ## Default configuration
 
