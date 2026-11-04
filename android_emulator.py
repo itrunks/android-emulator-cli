@@ -273,9 +273,18 @@ def emulator_path() -> Path:
     return path
 
 
-def start_emulator():
+def launch_emulator(device: str):
+    """Launch a named configured AVD."""
     require_macos()
+    normalized = device.strip().lower()
+    if normalized != "pixel":
+        raise SystemExit(f"Unknown device '{device}'. Supported device: pixel")
     run([emulator_path(), "-avd", AVD_NAME])
+
+
+def start_emulator():
+    """Backward-compatible alias for launching the default Pixel AVD."""
+    launch_emulator("pixel")
 
 
 def stop_emulator():
@@ -322,7 +331,9 @@ def main():
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("setup", help="Install SDK tools, Android API image and create Pixel AVD")
-    sub.add_parser("start", help="Start the Pixel emulator")
+    sub.add_parser("start", help="Start the default Pixel emulator (legacy alias)")
+    launch_parser = sub.add_parser("launch", help="Launch a named Android virtual device")
+    launch_parser.add_argument("device", choices=["pixel"], help="Device profile to launch")
     sub.add_parser("stop", help="Stop the running emulator")
     sub.add_parser("devices", help="List connected Android devices")
     sub.add_parser("doctor", help="Check the local setup")
@@ -334,6 +345,8 @@ def main():
         install_sdk()
     elif args.command == "start":
         start_emulator()
+    elif args.command == "launch":
+        launch_emulator(args.device)
     elif args.command == "stop":
         stop_emulator()
     elif args.command == "devices":
