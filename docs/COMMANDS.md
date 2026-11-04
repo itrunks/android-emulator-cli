@@ -1,25 +1,33 @@
 # Command Reference
 
-Run from the repository directory using `python3 android_emulator.py <command>`.
+After running `./scripts/install.sh`, use the globally installed command:
+
+```bash
+android-emulator <command>
+```
+
+## Launch Pixel
+
+The shortest everyday command is:
+
+```bash
+android-emulator launch pixel
+```
+
+## Other commands
 
 | Command | Description |
 |---|---|
-| `doctor` | Inspect macOS, architecture, SDK paths, emulator, ADB, disk and Java |
-| `setup` | Install command-line tools and SDK packages, then create the default AVD |
-| `start` | Launch `Pixel_API_35` |
-| `stop` | Stop the emulator through ADB |
-| `devices` | List physical and virtual devices |
-| `install-apk <path>` | Install or replace an APK on a connected device |
+| `android-emulator doctor` | Inspect macOS, architecture, SDK paths, emulator, ADB, disk and Java |
+| `android-emulator setup` | Install command-line tools and SDK packages, then create the default AVD |
+| `android-emulator launch pixel` | Launch the Pixel API 35 virtual device |
+| `android-emulator stop` | Stop the running emulator |
+| `android-emulator devices` | List physical and virtual devices |
+| `android-emulator install-apk <path>` | Install or replace an APK on a connected device |
 
-Examples:
+The original Python entry point remains available for development:
 
 ```bash
+python3 android_emulator.py launch pixel
 python3 android_emulator.py doctor
-python3 android_emulator.py setup
-python3 android_emulator.py start
-python3 android_emulator.py devices
-python3 android_emulator.py install-apk ~/Downloads/app-debug.apk
-python3 android_emulator.py stop
 ```
-
-The emulator must be running and visible to ADB before installing an APK.
