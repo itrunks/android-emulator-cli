@@ -53,6 +53,16 @@ def host_arch() -> str:
     raise SystemExit(f"Unsupported Mac architecture: {machine}")
 
 
+def sdk_host_arch() -> str:
+    """Return the Android repository host-arch label for this Mac."""
+    machine = platform.machine().lower()
+    if machine in ("arm64", "aarch64"):
+        return "aarch64"
+    if machine in ("x86_64", "amd64"):
+        return "x64"
+    raise SystemExit(f"Unsupported Mac architecture: {machine}")
+
+
 def sdk_bin(name: str) -> Path:
     return SDK / "cmdline-tools" / "latest" / "bin" / name
 
@@ -72,7 +82,7 @@ def ensure_java():
 
 
 def download_cmdline_tools():
-    """Find Google's current macOS command-line-tools archive from repository XML."""
+    """Download the official macOS command-line tools for this CPU architecture."""
     print("Fetching official Android SDK repository metadata...")
     request = urllib.request.Request(
         REPO_XML, headers={"User-Agent": "AndroidEmulatorCLI/1.0"}
@@ -81,29 +91,41 @@ def download_cmdline_tools():
         xml_data = response.read()
 
     root = ET.fromstring(xml_data)
-    archive_url = None
+    preferred_url = None
+    fallback_url = None
+    target_arch = sdk_host_arch()
 
     for package in root.findall(".//remotePackage"):
         if package.attrib.get("path") != "cmdline-tools;latest":
             continue
         for archive in package.findall(".//archive"):
             host = archive.find("host-os")
-            if host is not None and (host.text or "").strip() == "macosx":
-                complete = archive.find("complete")
-                url_node = complete.find("url") if complete is not None else None
-                if url_node is not None and url_node.text:
-                    archive_url = urllib.parse.urljoin(
-                        "https://dl.google.com/android/repository/",
-                        url_node.text.strip(),
-                    )
-                    break
-        if archive_url:
-            break
+            if host is None or (host.text or "").strip() != "macosx":
+                continue
 
+            complete = archive.find("complete")
+            url_node = complete.find("url") if complete is not None else None
+            if url_node is None or not url_node.text:
+                continue
+
+            candidate_url = urllib.parse.urljoin(
+                "https://dl.google.com/android/repository/",
+                url_node.text.strip(),
+            )
+            archive_arch = archive.find("host-arch")
+            if archive_arch is None:
+                fallback_url = fallback_url or candidate_url
+            elif (archive_arch.text or "").strip() == target_arch:
+                preferred_url = candidate_url
+                break
+
+        break
+
+    archive_url = preferred_url or fallback_url
     if not archive_url:
         raise SystemExit(
-            "Could not locate the current macOS command-line-tools package in "
-            "Google's repository metadata. Download it manually from "
+            f"Could not locate Google's macOS command-line-tools archive for {target_arch}. "
+            "Download it manually from "
             "https://developer.android.com/studio#command-line-tools-only"
         )
 
@@ -199,15 +221,11 @@ def install_sdk():
 
     print(f"\nMac architecture: {platform.machine()} ({arch})")
     print(f"SDK location: {SDK}")
-    print(f"Installing Android API {API} packages...")
-    run([manager, f"--sdk_root={SDK}", *packages])
+    print("\nReview and accept the Android SDK licence terms when prompted:")
+    run([manager, f"--sdk_root={SDK}", "--licenses"])
 
-    print("\nAccepting Android SDK licences...")
-    run(
-        [manager, f"--sdk_root={SDK}", "--licenses"],
-        check=False,
-        input_text=("y\n" * 100),
-    )
+    print(f"\nInstalling Android API {API} packages...")
+    run([manager, f"--sdk_root={SDK}", *packages])
 
     configure_environment()
     create_avd(image)
